@@ -3,633 +3,374 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Qure Scribe — Infrastructure & Cost Estimator</title>
-    <!-- Tailwind CSS -->
+    <title>Qure Scribe — Infrastructure Cost & ROI Calculator</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Chart.js -->
+    <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        cream: {
-                            50: '#faf7f2',
-                            100: '#f4efe6',
-                            200: '#e8e2d9',
-                            300: '#d9d0c3'
-                        },
-                        charcoal: {
-                            800: '#2b2e33',
-                            900: '#1c1e21'
-                        },
-                        sage: {
-                            50: '#f2f7f3',
-                            600: '#2a633d',
-                            700: '#204d2e'
-                        },
-                        terracotta: {
-                            50: '#fbf4f2',
-                            600: '#bd5338',
-                            700: '#9e422b'
-                        },
-                        warmSlate: {
-                            700: '#3a4a5e',
-                            800: '#2c3b4e',
-                            900: '#1e293b'
-                        }
-                    },
-                    fontFamily: {
-                        serif: ['Newsreader', 'Georgia', 'serif'],
-                        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
-                        mono: ['JetBrains Mono', 'Courier New', 'monospace']
-                    }
-                }
-            }
-        }
-    </script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap');
-
         body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
             background-color: #faf7f2;
-            color: #1c1e21;
-            font-family: 'Inter', sans-serif;
+            color: #212529;
         }
-
-        .editorial-title {
-            font-family: 'Newsreader', Georgia, serif;
+        h1, h2, h3, .serif-heading {
+            font-family: 'Instrument Serif', serif;
         }
-
-        /* Tactile Humanist Cards */
-        .paper-card {
+        .card-custom {
             background-color: #ffffff;
             border: 1px solid #e8e2d9;
-            box-shadow: 0 2px 8px -2px rgba(28, 30, 33, 0.04), 0 1px 2px -1px rgba(28, 30, 33, 0.02);
-            border-radius: 12px;
+            box-shadow: 0 4px 20px -2px rgba(28, 25, 23, 0.05);
         }
-
-        .paper-card-subtle {
-            background-color: #f4efe6;
-            border: 1px solid #e8e2d9;
-            border-radius: 10px;
-        }
-
-        /* Human Custom Range Input */
         input[type=range] {
-            -webkit-appearance: none;
-            background: #e8e2d9;
-            height: 6px;
-            border-radius: 3px;
-        }
-
-        input[type=range]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            height: 20px;
-            width: 20px;
-            border-radius: 50%;
-            background: #2c3b4e;
-            border: 2px solid #ffffff;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.15);
-            cursor: pointer;
-            transition: transform 0.1s ease;
-        }
-
-        input[type=range]::-webkit-slider-thumb:hover {
-            transform: scale(1.1);
-        }
-
-        /* Print styles */
-        @media print {
-            .no-print { display: none !important; }
-            body { background-color: #ffffff; color: #000000; }
-            .paper-card { border: 1px solid #ccc; box-shadow: none; }
+            accent-color: #2a633d;
         }
     </style>
 </head>
-<body class="min-h-screen pb-16">
+<body class="p-4 md:p-8 min-h-screen">
 
-    <!-- Header / Editorial Banner -->
-    <header class="border-b border-cream-200 bg-[#faf7f2] sticky top-0 z-40">
-        <div class="max-w-6xl mx-auto px-6 py-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div class="max-w-6xl mx-auto">
+        <!-- Header -->
+        <header class="mb-8 border-b border-stone-200 pb-6 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
             <div>
-                <div class="flex items-center gap-2 text-sage-600 text-xs font-semibold tracking-wider uppercase">
-                    <span class="w-2 h-2 rounded-full bg-sage-600"></span>
-                    Qure Scribe Architecture
+                <div class="inline-flex items-center gap-2 px-3 py-1 bg-stone-200/60 rounded-full text-stone-700 text-xs font-semibold uppercase tracking-wider mb-2">
+                    Internal Engineering Tool
                 </div>
-                <h1 class="text-2xl sm:text-3xl font-medium editorial-title text-charcoal-900 mt-0.5">
-                    Infrastructure & Cost Planner
-                </h1>
+                <h1 class="text-4xl md:text-5xl font-normal text-stone-900 tracking-tight">Qure Scribe</h1>
+                <p class="text-stone-600 text-base mt-1">Infrastructure Cost Estimation & Clinic ROI Calculator</p>
             </div>
-            
-            <div class="flex items-center gap-3 no-print">
-                <!-- Currency Selector Toggle -->
-                <div class="flex items-center bg-cream-100 p-1 rounded-lg border border-cream-200 text-xs">
-                    <button id="currUSD" onclick="setCurrency('USD')" class="px-3 py-1.5 rounded-md font-medium text-charcoal-900 bg-white shadow-sm transition">USD ($)</button>
-                    <button id="currINR" onclick="setCurrency('INR')" class="px-3 py-1.5 rounded-md font-medium text-slate-600 hover:text-charcoal-900 transition">INR (₹)</button>
-                </div>
-
-                <button onclick="window.print()" class="flex items-center gap-1.5 text-xs font-medium bg-white hover:bg-cream-50 text-charcoal-900 px-3.5 py-2 rounded-lg border border-cream-200 shadow-sm transition">
-                    <i data-lucide="printer" class="w-3.5 h-3.5 text-slate-500"></i>
-                    Print Summary
-                </button>
-            </div>
-        </div>
-    </header>
-
-    <main class="max-w-6xl mx-auto px-6 pt-8 space-y-8">
-
-        <!-- Top Context Note -->
-        <div class="paper-card p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-            <div class="space-y-1 max-w-2xl">
-                <h2 class="text-base font-semibold text-charcoal-900 flex items-center gap-2">
-                    Transparent Technical Cost Modeling
-                </h2>
-                <p class="text-xs text-slate-600 leading-relaxed">
-                    Designed for engineering leaders and clinic administrators to forecast operational expenses accurately. Rates are modeled directly on cloud provider pay-as-you-go pricing without hidden markups.
-                </p>
-            </div>
-            
-            <div class="paper-card-subtle p-3.5 flex items-center gap-3 self-stretch md:self-auto">
-                <div class="text-xs space-y-0.5">
-                    <span class="text-slate-500 block">Current Exchange Rate</span>
-                    <div class="flex items-center gap-1.5">
-                        <span class="font-mono text-xs font-semibold text-charcoal-900">1 USD =</span>
-                        <div class="flex items-center bg-white px-2 py-0.5 rounded border border-cream-200">
-                            <span class="text-xs text-slate-400 font-mono">₹</span>
-                            <input type="number" id="exRateInput" value="94.80" step="0.5" class="w-12 text-xs font-mono font-semibold text-charcoal-900 bg-transparent text-right focus:outline-none">
-                        </div>
-                    </div>
+            <div class="bg-stone-100 p-3 rounded-lg border border-stone-200 text-xs text-stone-600 flex items-center gap-3">
+                <div>
+                    <span class="block font-semibold text-stone-800">Exchange Rate:</span>
+                    <span>1 USD = ₹<input type="number" id="usdToInr" value="94.73" class="w-12 text-center bg-white border border-stone-300 rounded text-stone-900 font-semibold focus:outline-none" oninput="calculateCosts()"></span>
                 </div>
             </div>
-        </div>
+        </header>
 
-        <!-- Main Interactive Layout -->
+        <!-- Main Grid -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-
-            <!-- Controls Column (5 cols) -->
+            
+            <!-- Left Panel: Interactive Inputs -->
             <div class="lg:col-span-5 space-y-6">
-                
-                <div class="paper-card p-6 space-y-6">
-                    <div class="border-b border-cream-200 pb-3 flex justify-between items-center">
-                        <h3 class="text-sm font-semibold text-charcoal-900">Consultation Parameters</h3>
-                        <span class="text-xs text-slate-400 font-mono">Input Metrics</span>
-                    </div>
-
-                    <!-- Slider 1: Patient Volume -->
-                    <div class="space-y-2">
-                        <div class="flex justify-between items-center text-xs">
-                            <label for="patientsRange" class="font-medium text-charcoal-800">Daily Patient Volume</label>
-                            <span class="font-mono font-semibold text-sage-600 bg-sage-50 px-2 py-0.5 rounded border border-sage-600/20" id="patientsVal">30 patients/day</span>
+                <div class="card-custom p-6 rounded-2xl">
+                    <h2 class="text-2xl font-normal text-stone-900 mb-6 pb-2 border-b border-stone-100">Consultation Parameters</h2>
+                    
+                    <!-- Daily Patients Slider -->
+                    <div class="mb-6">
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="text-sm font-medium text-stone-700">Daily Patient Volume</label>
+                            <span id="patientValue" class="text-base font-bold text-stone-900 bg-stone-100 px-3 py-1 rounded-md border border-stone-200">50 patients</span>
                         </div>
-                        <input type="range" id="patientsRange" min="10" max="500" value="30" step="5" class="w-full">
-                        <div class="flex justify-between text-[10px] text-slate-400 font-mono">
-                            <span>10</span>
-                            <span>250</span>
-                            <span>500</span>
+                        <input type="range" id="dailyPatients" min="1" max="500" value="50" step="1" class="w-full h-2 bg-stone-200 rounded-lg cursor-pointer" oninput="calculateCosts()">
+                        <div class="flex justify-between text-xs text-stone-400 mt-1">
+                            <span>1 (Clinic)</span>
+                            <span>50 (Target Scope)</span>
+                            <span>500 (Hospital)</span>
                         </div>
                     </div>
 
-                    <!-- Slider 2: Consultation Time -->
-                    <div class="space-y-2">
-                        <div class="flex justify-between items-center text-xs">
-                            <label for="durationRange" class="font-medium text-charcoal-800">Avg. Consultation Length</label>
-                            <span class="font-mono font-semibold text-sage-600 bg-sage-50 px-2 py-0.5 rounded border border-sage-600/20" id="durationVal">10 minutes</span>
+                    <!-- Audio Length Slider -->
+                    <div class="mb-6">
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="text-sm font-medium text-stone-700">Avg. Audio Duration / Patient</label>
+                            <span id="audioValue" class="text-base font-bold text-stone-900 bg-stone-100 px-3 py-1 rounded-md border border-stone-200">10 mins</span>
                         </div>
-                        <input type="range" id="durationRange" min="3" max="30" value="10" step="1" class="w-full">
-                        <div class="flex justify-between text-[10px] text-slate-400 font-mono">
-                            <span>3 min</span>
-                            <span>15 min</span>
-                            <span>30 min</span>
-                        </div>
-                    </div>
-
-                    <!-- Time Horizon Selector -->
-                    <div class="space-y-2">
-                        <label class="text-xs font-medium text-charcoal-800 block">Calculation Timeframe</label>
-                        <div class="grid grid-cols-4 gap-2">
-                            <button onclick="setTimeframe(1)" class="time-btn text-xs py-2 rounded-lg border border-cream-200 bg-white text-slate-600 font-medium hover:border-slate-300 transition" data-months="1">1 Mo</button>
-                            <button onclick="setTimeframe(2)" class="time-btn active text-xs py-2 rounded-lg border border-warmSlate-800 bg-warmSlate-800 text-white font-medium shadow-sm transition" data-months="2">2 Mos</button>
-                            <button onclick="setTimeframe(6)" class="time-btn text-xs py-2 rounded-lg border border-cream-200 bg-white text-slate-600 font-medium hover:border-slate-300 transition" data-months="6">6 Mos</button>
-                            <button onclick="setTimeframe(12)" class="time-btn text-xs py-2 rounded-lg border border-cream-200 bg-white text-slate-600 font-medium hover:border-slate-300 transition" data-months="12">1 Year</button>
+                        <input type="range" id="audioDuration" min="2" max="30" value="10" step="1" class="w-full h-2 bg-stone-200 rounded-lg cursor-pointer" oninput="calculateCosts()">
+                        <div class="flex justify-between text-xs text-stone-400 mt-1">
+                            <span>2 mins</span>
+                            <span>10 mins</span>
+                            <span>30 mins</span>
                         </div>
                     </div>
 
-                    <!-- Groq Model Selection -->
-                    <div class="space-y-2">
-                        <label for="modelSelect" class="text-xs font-medium text-charcoal-800 block">Clinical LLM Model (Groq Engine)</label>
-                        <select id="modelSelect" class="w-full bg-white border border-cream-200 rounded-lg p-2.5 text-xs text-charcoal-900 focus:outline-none focus:border-warmSlate-700 transition">
-                            <option value="llama-8b" selected>Llama 3.1 8B ($0.05 / 1M In, $0.08 / 1M Out)</option>
-                            <option value="llama-70b">Llama 3.3 70B ($0.59 / 1M In, $0.79 / 1M Out)</option>
+                    <!-- Duration in Months -->
+                    <div class="mb-6">
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="text-sm font-medium text-stone-700">Estimation Horizon</label>
+                            <span id="monthsValue" class="text-base font-bold text-stone-900 bg-stone-100 px-3 py-1 rounded-md border border-stone-200">2 Months</span>
+                        </div>
+                        <input type="range" id="durationMonths" min="1" max="12" value="2" step="1" class="w-full h-2 bg-stone-200 rounded-lg cursor-pointer" oninput="calculateCosts()">
+                        <div class="flex justify-between text-xs text-stone-400 mt-1">
+                            <span>1 Month</span>
+                            <span>2 Months</span>
+                            <span>12 Months</span>
+                        </div>
+                    </div>
+
+                    <!-- Model Selection -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-stone-700 mb-2">Groq LLM Engine</label>
+                        <select id="llmModel" class="w-full p-3 bg-stone-50 border border-stone-200 rounded-lg text-sm font-medium text-stone-800 focus:outline-none focus:border-stone-400" onchange="calculateCosts()">
+                            <option value="gpt-oss-120b" selected>OpenAI GPT-OSS 120B ($0.15 / $0.60 per 1M)</option>
+                            <option value="llama-8b">Groq Llama 3.1 8B ($0.05 / $0.08 per 1M)</option>
+                            <option value="llama-70b">Groq Llama 3.3 70B ($0.59 / $0.79 per 1M)</option>
                         </select>
                     </div>
 
-                    <!-- Module Toggles -->
-                    <div class="space-y-3 pt-2 border-t border-cream-200">
-                        <span class="text-xs font-semibold text-charcoal-900 block">Active Architecture Components</span>
-                        
-                        <label class="flex items-center justify-between cursor-pointer">
-                            <span class="text-xs text-slate-600">Deepgram Audio Transcription</span>
-                            <input type="checkbox" id="toggleDeepgram" checked class="accent-warmSlate-800 w-4 h-4 rounded">
+                    <!-- Free Tier Discount Toggles -->
+                    <div class="space-y-3 pt-4 border-t border-stone-100">
+                        <span class="block text-xs font-semibold text-stone-500 uppercase tracking-wider">Vendor Free Tiers</span>
+                        <label class="flex items-center gap-3 cursor-pointer">
+                            <input type="checkbox" id="deepgramFree" checked class="w-4 h-4 rounded border-stone-300 text-emerald-800 focus:ring-0" onchange="calculateCosts()">
+                            <span class="text-sm text-stone-700">Apply Deepgram $200 New Account Credit</span>
                         </label>
-                        
-                        <label class="flex items-center justify-between cursor-pointer">
-                            <span class="text-xs text-slate-600">AWS Comprehend Medical NLP</span>
-                            <input type="checkbox" id="toggleComprehend" checked class="accent-warmSlate-800 w-4 h-4 rounded">
-                        </label>
-
-                        <label class="flex items-center justify-between cursor-pointer">
-                            <span class="text-xs text-slate-600">AWS S3 Audio Storage & Database</span>
-                            <input type="checkbox" id="toggleS3" checked class="accent-warmSlate-800 w-4 h-4 rounded">
+                        <label class="flex items-center gap-3 cursor-pointer">
+                            <input type="checkbox" id="awsFree" checked class="w-4 h-4 rounded border-stone-300 text-emerald-800 focus:ring-0" onchange="calculateCosts()">
+                            <span class="text-sm text-stone-700">Apply AWS Comprehend Medical Free Allowance</span>
                         </label>
                     </div>
-
-                    <!-- Free Tier Discount Toggle -->
-                    <div class="pt-3 border-t border-cream-200 flex items-center justify-between">
-                        <div class="space-y-0.5">
-                            <span class="text-xs font-medium text-charcoal-900 block">Apply Cloud Free Tier Allowances</span>
-                            <span class="text-[11px] text-slate-500">Deepgram $200 grant & AWS 10k free units</span>
-                        </div>
-                        <input type="checkbox" id="toggleFreeTier" checked class="accent-sage-600 w-4 h-4 rounded">
-                    </div>
-
                 </div>
 
-            </div>
-
-            <!-- Summary & Charts Column (7 cols) -->
-            <div class="lg:col-span-7 space-y-6">
-
-                <!-- Primary Metric Highlights -->
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <!-- ROI Insights Card -->
+                <div class="card-custom p-6 rounded-2xl bg-stone-900 text-white">
+                    <h3 class="text-xl font-normal text-stone-100 mb-2">Estimated Clinic ROI</h3>
+                    <p class="text-xs text-stone-400 mb-4">Based on saving ~12 minutes of manual scribing per patient at doctor billing rate of ₹1,200/hr.</p>
                     
-                    <div class="paper-card p-5 space-y-1">
-                        <span class="text-xs text-slate-500 font-medium block">Total Estimated Cost</span>
-                        <div class="text-2xl font-bold font-serif text-charcoal-900" id="displayTotalCost">$0.00</div>
-                        <span class="text-[11px] text-slate-500 block font-mono" id="displayTotalAlt">₹0.00</span>
-                        <span class="text-[10px] text-sage-600 font-medium block pt-1" id="timeframeLabel">Over 2 Months</span>
+                    <div class="grid grid-cols-2 gap-4 border-t border-stone-800 pt-4">
+                        <div>
+                            <span class="text-xs text-stone-400 block">Hours Saved</span>
+                            <span id="hoursSaved" class="text-2xl font-bold text-stone-100">600 hrs</span>
+                        </div>
+                        <div>
+                            <span class="text-xs text-stone-400 block">Value Generated</span>
+                            <span id="valueCreated" class="text-2xl font-bold text-emerald-400">₹7,20,000</span>
+                        </div>
                     </div>
-
-                    <div class="paper-card p-5 space-y-1">
-                        <span class="text-xs text-slate-500 font-medium block">Free Tier Savings</span>
-                        <div class="text-2xl font-bold font-serif text-sage-600" id="displaySavings">$0.00</div>
-                        <span class="text-[11px] text-slate-500 block font-mono" id="displaySavingsAlt">₹0.00</span>
-                        <span class="text-[10px] text-slate-400 block pt-1">Cloud grants applied</span>
-                    </div>
-
-                    <div class="paper-card p-5 space-y-1">
-                        <span class="text-xs text-slate-500 font-medium block">Cost per Consultation</span>
-                        <div class="text-2xl font-bold font-serif text-terracotta-600" id="displayPerUnit">$0.000</div>
-                        <span class="text-[11px] text-slate-500 block font-mono" id="displayPerUnitAlt">₹0.00</span>
-                        <span class="text-[10px] text-slate-400 block pt-1">Per patient visit</span>
-                    </div>
-
                 </div>
+            </div>
 
-                <!-- Live Derived Volume Metrics -->
-                <div class="paper-card-subtle p-4 grid grid-cols-3 gap-4 text-center">
+            <!-- Right Panel: Results & Cost Breakdown -->
+            <div class="lg:col-span-7 space-y-6">
+                
+                <!-- Total Cost Highlight Card -->
+                <div class="card-custom p-6 rounded-2xl border-l-4 border-l-emerald-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div>
-                        <span class="text-[11px] text-slate-500 uppercase tracking-wider block font-medium">Total Audio</span>
-                        <span class="text-sm font-semibold font-mono text-charcoal-900" id="statAudioHours">0 Hours</span>
+                        <span class="text-xs font-semibold text-stone-500 uppercase tracking-wider">Total Net Infrastructure Cost</span>
+                        <div class="flex items-baseline gap-3 mt-1">
+                            <span id="totalCostUSD" class="text-4xl font-extrabold text-stone-900">$0.00</span>
+                            <span id="totalCostINR" class="text-xl font-semibold text-emerald-800">(₹0)</span>
+                        </div>
+                        <span id="costPerPatient" class="text-xs text-stone-500 mt-1 block">Cost per consultation: $0.000 / ₹0.00</span>
                     </div>
-                    <div>
-                        <span class="text-[11px] text-slate-500 uppercase tracking-wider block font-medium">Comprehend Units</span>
-                        <span class="text-sm font-semibold font-mono text-charcoal-900" id="statUnits">0 Units</span>
-                    </div>
-                    <div>
-                        <span class="text-[11px] text-slate-500 uppercase tracking-wider block font-medium">Estimated Tokens</span>
-                        <span class="text-sm font-semibold font-mono text-charcoal-900" id="statTokens">0.0M Tokens</span>
+                    <div id="freeTierStatus" class="bg-emerald-50 text-emerald-900 border border-emerald-200 px-4 py-2 rounded-lg text-xs font-medium">
+                        100% Covered by Free Tiers
                     </div>
                 </div>
 
-                <!-- Donut Chart -->
-                <div class="paper-card p-6 space-y-3">
-                    <div class="flex justify-between items-center">
-                        <h3 class="text-sm font-semibold text-charcoal-900">Cost Distribution by Service</h3>
-                        <span class="text-xs text-slate-400">Component Share</span>
+                <!-- Vendor Cost Breakdown Table -->
+                <div class="card-custom p-6 rounded-2xl">
+                    <h2 class="text-2xl font-normal text-stone-900 mb-4">Vendor Cost Breakdown</h2>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm text-stone-700">
+                            <thead>
+                                <tr class="border-b border-stone-200 text-xs text-stone-500 uppercase tracking-wider">
+                                    <th class="pb-3 font-semibold">Vendor & Service</th>
+                                    <th class="pb-3 font-semibold">Estimated Usage</th>
+                                    <th class="pb-3 font-semibold text-right">Gross Cost</th>
+                                    <th class="pb-3 font-semibold text-right">Free Tier Credit</th>
+                                    <th class="pb-3 font-semibold text-right">Net Cost (USD)</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-stone-100">
+                                <tr>
+                                    <td class="py-3 font-medium text-stone-900">Deepgram STT <span class="block text-xs text-stone-400 font-normal">Nova-3 Speech-to-Text</span></td>
+                                    <td id="deepgramUsage" class="py-3 text-xs">30,000 mins</td>
+                                    <td id="deepgramGross" class="py-3 text-right">$129.00</td>
+                                    <td id="deepgramDiscount" class="py-3 text-right text-emerald-700">-$129.00</td>
+                                    <td id="deepgramNet" class="py-3 text-right font-bold">$0.00</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-3 font-medium text-stone-900">Groq LLM Engine <span id="groqModelLabel" class="block text-xs text-stone-400 font-normal">openai/gpt-oss-120b</span></td>
+                                    <td id="groqUsage" class="py-3 text-xs">9.0M In / 4.5M Out</td>
+                                    <td id="groqGross" class="py-3 text-right">$4.05</td>
+                                    <td id="groqDiscount" class="py-3 text-right text-stone-400">$0.00</td>
+                                    <td id="groqNet" class="py-3 text-right font-bold">$4.05</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-3 font-medium text-stone-900">AWS Comprehend Med <span class="block text-xs text-stone-400 font-normal">DetectEntitiesV2</span></td>
+                                    <td id="awsUsage" class="py-3 text-xs">150,000 Units</td>
+                                    <td id="awsGross" class="py-3 text-right">$15.00</td>
+                                    <td id="awsDiscount" class="py-3 text-right text-emerald-700">-$5.00</td>
+                                    <td id="awsNet" class="py-3 text-right font-bold">$10.00</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-3 font-medium text-stone-900">AWS S3 Storage <span class="block text-xs text-stone-400 font-normal">Audio & JSON Backup</span></td>
+                                    <td id="s3Usage" class="py-3 text-xs">15.0 GB</td>
+                                    <td id="s3Gross" class="py-3 text-right">$0.35</td>
+                                    <td id="s3Discount" class="py-3 text-right text-emerald-700">-$0.12</td>
+                                    <td id="s3Net" class="py-3 text-right font-bold">$0.23</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
-                    <div class="h-56 relative">
-                        <canvas id="costDonutChart"></canvas>
+                </div>
+
+                <!-- Visual Charts Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="card-custom p-5 rounded-2xl">
+                        <h3 class="text-lg font-normal text-stone-900 mb-3">Cost Component Distribution</h3>
+                        <div class="h-48 relative flex items-center justify-center">
+                            <canvas id="costChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="card-custom p-5 rounded-2xl">
+                        <h3 class="text-lg font-normal text-stone-900 mb-3">Scaling Cost Projection</h3>
+                        <div class="h-48 relative flex items-center justify-center">
+                            <canvas id="scalingChart"></canvas>
+                        </div>
                     </div>
                 </div>
 
             </div>
-
         </div>
-
-        <!-- Detailed Breakdown Table -->
-        <div class="paper-card overflow-hidden">
-            <div class="p-6 border-b border-cream-200">
-                <h3 class="text-base font-semibold text-charcoal-900">Itemized Financial Breakdown</h3>
-                <p class="text-xs text-slate-500 mt-0.5">Calculated based on actual payload sizes and official API pricing structures</p>
-            </div>
-            
-            <div class="overflow-x-auto">
-                <table class="w-full text-left text-xs">
-                    <thead class="bg-cream-100 text-charcoal-800 font-semibold border-b border-cream-200">
-                        <tr>
-                            <th class="py-3 px-6">Service Module</th>
-                            <th class="py-3 px-4">Usage Volume</th>
-                            <th class="py-3 px-4">Official Rate Formula</th>
-                            <th class="py-3 px-4">Gross Cost</th>
-                            <th class="py-3 px-4">Free Tier Deduction</th>
-                            <th class="py-3 px-6 text-right">Net Payable Cost</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-cream-200 font-mono text-charcoal-800">
-                        <tr>
-                            <td class="py-3.5 px-6 font-sans font-medium text-charcoal-900 flex items-center gap-2">
-                                <span class="w-2.5 h-2.5 rounded-full bg-warmSlate-800"></span>
-                                Deepgram Speech-to-Text
-                            </td>
-                            <td class="py-3.5 px-4 text-slate-600" id="rowDgVol">0 mins</td>
-                            <td class="py-3.5 px-4 text-slate-500 font-sans">$0.0043 / audio min</td>
-                            <td class="py-3.5 px-4 text-slate-600" id="rowDgGross">$0.00</td>
-                            <td class="py-3.5 px-4 text-sage-600" id="rowDgDisc">-$0.00</td>
-                            <td class="py-3.5 px-6 text-right font-bold text-charcoal-900" id="rowDgNet">$0.00</td>
-                        </tr>
-                        <tr>
-                            <td class="py-3.5 px-6 font-sans font-medium text-charcoal-900 flex items-center gap-2">
-                                <span class="w-2.5 h-2.5 rounded-full bg-terracotta-600"></span>
-                                AWS Comprehend Medical
-                            </td>
-                            <td class="py-3.5 px-4 text-slate-600" id="rowCompVol">0 units</td>
-                            <td class="py-3.5 px-4 text-slate-500 font-sans">$0.01 / 100 text units</td>
-                            <td class="py-3.5 px-4 text-slate-600" id="rowCompGross">$0.00</td>
-                            <td class="py-3.5 px-4 text-sage-600" id="rowCompDisc">-$0.00</td>
-                            <td class="py-3.5 px-6 text-right font-bold text-charcoal-900" id="rowCompNet">$0.00</td>
-                        </tr>
-                        <tr>
-                            <td class="py-3.5 px-6 font-sans font-medium text-charcoal-900 flex items-center gap-2">
-                                <span class="w-2.5 h-2.5 rounded-full bg-sage-600"></span>
-                                Groq API (Clinical LLM)
-                            </td>
-                            <td class="py-3.5 px-4 text-slate-600" id="rowGroqVol">0M tokens</td>
-                            <td class="py-3.5 px-4 text-slate-500 font-sans" id="rowGroqRate">$0.05 / 1M input tokens</td>
-                            <td class="py-3.5 px-4 text-slate-600" id="rowGroqGross">$0.00</td>
-                            <td class="py-3.5 px-4 text-sage-600">$0.00</td>
-                            <td class="py-3.5 px-6 text-right font-bold text-charcoal-900" id="rowGroqNet">$0.00</td>
-                        </tr>
-                        <tr>
-                            <td class="py-3.5 px-6 font-sans font-medium text-charcoal-900 flex items-center gap-2">
-                                <span class="w-2.5 h-2.5 rounded-full bg-slate-400"></span>
-                                AWS S3 & Meta Storage
-                            </td>
-                            <td class="py-3.5 px-4 text-slate-600" id="rowS3Vol">0 GB</td>
-                            <td class="py-3.5 px-4 text-slate-500 font-sans">$0.023 / GB storage</td>
-                            <td class="py-3.5 px-4 text-slate-600" id="rowS3Gross">$0.00</td>
-                            <td class="py-3.5 px-4 text-sage-600" id="rowS3Disc">-$0.00</td>
-                            <td class="py-3.5 px-6 text-right font-bold text-charcoal-900" id="rowS3Net">$0.00</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Humanist Notes & Safety Controls -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="paper-card p-5 space-y-1.5">
-                <h4 class="text-xs font-semibold text-charcoal-900 flex items-center gap-1.5">
-                    <i data-lucide="shield-check" class="w-4 h-4 text-sage-600"></i>
-                    AWS Budget Protection
-                </h4>
-                <p class="text-xs text-slate-600 leading-relaxed">
-                    Configure AWS Cost Explorer hard limits with SNS notifications at $25.00/month to prevent unbudgeted overages.
-                </p>
-            </div>
-
-            <div class="paper-card p-5 space-y-1.5">
-                <h4 class="text-xs font-semibold text-charcoal-900 flex items-center gap-1.5">
-                    <i data-lucide="scissors" class="w-4 h-4 text-terracotta-600"></i>
-                    Silence & VAD Filtering
-                </h4>
-                <p class="text-xs text-slate-600 leading-relaxed">
-                    Client-side voice activity detection (VAD) strips quiet pauses before sending audio, lowering Deepgram cost by ~20%.
-                </p>
-            </div>
-
-            <div class="paper-card p-5 space-y-1.5">
-                <h4 class="text-xs font-semibold text-charcoal-900 flex items-center gap-1.5">
-                    <i data-lucide="zap" class="w-4 h-4 text-warmSlate-800"></i>
-                    Groq Burst Buffer
-                </h4>
-                <p class="text-xs text-slate-600 leading-relaxed">
-                    Internal requests pass through <code>scribe/clinical-notes/service.js</code> queuing to maintain compliance with API rate limits.
-                </p>
-            </div>
-        </div>
-
-    </main>
-
-    <!-- Footer -->
-    <footer class="max-w-6xl mx-auto px-6 mt-12 pt-6 border-t border-cream-200 text-xs text-slate-500 flex flex-col sm:flex-row justify-between items-center gap-4">
-        <p>Qure Scribe Technical Documentation & Cost Tool</p>
-        <p class="font-mono">Hand-crafted architecture estimation</p>
-    </footer>
-
-    <!-- Application Script -->
-    <script>
-        // State State
-        let patientsPerDay = 30;
-        let durationMins = 10;
-        let timeframeMonths = 2;
-        let selectedCurrency = 'USD';
-        let exchangeRate = 94.80;
         
-        let donutChart = null;
+        <footer class="mt-12 text-center text-xs text-stone-400 border-t border-stone-200 pt-6">
+            Qure Scribe Project Documentation & Infrastructure Estimation Tool &bull; Configured for Node.js / Groq / AWS Stack
+        </footer>
+    </div>
 
-        // Elements
-        const patientsRange = document.getElementById('patientsRange');
-        const patientsVal = document.getElementById('patientsVal');
-        const durationRange = document.getElementById('durationRange');
-        const durationVal = document.getElementById('durationVal');
-        const modelSelect = document.getElementById('modelSelect');
-        const exRateInput = document.getElementById('exRateInput');
+    <!-- Application Logic -->
+    <script>
+        let costChart = null;
+        let scalingChart = null;
 
-        const toggleDeepgram = document.getElementById('toggleDeepgram');
-        const toggleComprehend = document.getElementById('toggleComprehend');
-        const toggleS3 = document.getElementById('toggleS3');
-        const toggleFreeTier = document.getElementById('toggleFreeTier');
+        const modelRates = {
+            'gpt-oss-120b': { input: 0.15, output: 0.60, name: 'openai/gpt-oss-120b' },
+            'llama-8b':     { input: 0.05, output: 0.08, name: 'Llama 3.1 8B Instant' },
+            'llama-70b':    { input: 0.59, output: 0.79, name: 'Llama 3.3 70B Versatile' }
+        };
 
-        // Init Lucide
-        lucide.createIcons();
+        function calculateCosts() {
+            // Inputs
+            const dailyPatients = parseInt(document.getElementById('dailyPatients').value);
+            const audioDuration = parseInt(document.getElementById('audioDuration').value);
+            const months = parseInt(document.getElementById('durationMonths').value);
+            const selectedModelKey = document.getElementById('llmModel').value;
+            const usdToInr = parseFloat(document.getElementById('usdToInr').value) || 94.73;
+            
+            const applyDeepgramFree = document.getElementById('deepgramFree').checked;
+            const applyAwsFree = document.getElementById('awsFree').checked;
 
-        // Listeners
-        patientsRange.addEventListener('input', (e) => {
-            patientsPerDay = parseInt(e.target.value);
-            patientsVal.textContent = `${patientsPerDay} patients/day`;
-            calculate();
-        });
+            // UI Labels update
+            document.getElementById('patientValue').innerText = `${dailyPatients} patients/day`;
+            document.getElementById('audioValue').innerText = `${audioDuration} mins`;
+            document.getElementById('monthsValue').innerText = `${months} Month${months > 1 ? 's' : ''}`;
 
-        durationRange.addEventListener('input', (e) => {
-            durationMins = parseInt(e.target.value);
-            durationVal.textContent = `${durationMins} minutes`;
-            calculate();
-        });
+            const totalPatients = dailyPatients * 30 * months;
+            const modelInfo = modelRates[selectedModelKey];
+            document.getElementById('groqModelLabel').innerText = modelInfo.name;
 
-        modelSelect.addEventListener('change', calculate);
-        exRateInput.addEventListener('input', (e) => {
-            exchangeRate = parseFloat(e.target.value) || 94.80;
-            calculate();
-        });
-
-        toggleDeepgram.addEventListener('change', calculate);
-        toggleComprehend.addEventListener('change', calculate);
-        toggleS3.addEventListener('change', calculate);
-        toggleFreeTier.addEventListener('change', calculate);
-
-        function setTimeframe(months) {
-            timeframeMonths = months;
-            document.querySelectorAll('.time-btn').forEach(btn => {
-                const m = parseInt(btn.getAttribute('data-months'));
-                if (m === months) {
-                    btn.className = "time-btn active text-xs py-2 rounded-lg border border-warmSlate-800 bg-warmSlate-800 text-white font-medium shadow-sm transition";
-                } else {
-                    btn.className = "time-btn text-xs py-2 rounded-lg border border-cream-200 bg-white text-slate-600 font-medium hover:border-slate-300 transition";
-                }
-            });
-            document.getElementById('timeframeLabel').textContent = `Over ${months} Month${months > 1 ? 's' : ''}`;
-            calculate();
-        }
-
-        function setCurrency(curr) {
-            selectedCurrency = curr;
-            const btnUSD = document.getElementById('currUSD');
-            const btnINR = document.getElementById('currINR');
-
-            if (curr === 'USD') {
-                btnUSD.className = "px-3 py-1.5 rounded-md font-medium text-charcoal-900 bg-white shadow-sm transition";
-                btnINR.className = "px-3 py-1.5 rounded-md font-medium text-slate-600 hover:text-charcoal-900 transition";
-            } else {
-                btnINR.className = "px-3 py-1.5 rounded-md font-medium text-charcoal-900 bg-white shadow-sm transition";
-                btnUSD.className = "px-3 py-1.5 rounded-md font-medium text-slate-600 hover:text-charcoal-900 transition";
+            // 1. Deepgram Cost Calculation ($0.0043/min)
+            const totalAudioMinutes = totalPatients * audioDuration;
+            const deepgramGrossCost = totalAudioMinutes * 0.0043;
+            let deepgramDiscount = 0;
+            if (applyDeepgramFree) {
+                deepgramDiscount = Math.min(200, deepgramGrossCost);
             }
-            calculate();
-        }
+            const deepgramNetCost = Math.max(0, deepgramGrossCost - deepgramDiscount);
 
-        function formatMoney(amountUSD) {
-            if (selectedCurrency === 'INR') {
-                return `₹${(amountUSD * exchangeRate).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-            }
-            return `$${amountUSD.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-        }
+            // 2. Groq Cost Calculation
+            // ~3,000 input tokens and 1,500 output tokens per patient note
+            const inputTokens = (totalPatients * 3000) / 1000000;
+            const outputTokens = (totalPatients * 1500) / 1000000;
+            const groqGrossCost = (inputTokens * modelInfo.input) + (outputTokens * modelInfo.output);
+            const groqNetCost = groqGrossCost; // No credits assumed
 
-        function formatMoneyAlt(amountUSD) {
-            if (selectedCurrency === 'INR') {
-                return `$${amountUSD.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-            }
-            return `₹${(amountUSD * exchangeRate).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-        }
-
-        function calculate() {
-            const totalDays = timeframeMonths * 30;
-            const totalPatients = patientsPerDay * totalDays;
-            const totalAudioMins = totalPatients * durationMins;
-            const totalAudioHours = Math.round(totalAudioMins / 60);
-
-            const isFreeTier = toggleFreeTier.checked;
-
-            // 1. Deepgram STT ($0.0043/min)
-            let dgGross = 0, dgDisc = 0, dgNet = 0;
-            if (toggleDeepgram.checked) {
-                dgGross = totalAudioMins * 0.0043;
-                if (isFreeTier) {
-                    dgDisc = Math.min(200, dgGross);
-                }
-                dgNet = Math.max(0, dgGross - dgDisc);
-            }
-
-            // 2. AWS Comprehend Medical ($0.01 / 100 chars unit ~ 50 units per patient transcript)
-            let compGross = 0, compDisc = 0, compNet = 0;
+            // 3. AWS Comprehend Medical Calculation ($0.01 per 10,000 units)
+            // ~50 units per patient consultation
             const totalUnits = totalPatients * 50;
-            if (toggleComprehend.checked) {
-                compGross = (totalUnits / 100) * 0.01;
-                const freeUnits = isFreeTier ? (timeframeMonths * 10000) : 0;
-                const billableUnits = Math.max(0, totalUnits - freeUnits);
-                compNet = (billableUnits / 100) * 0.01;
-                compDisc = compGross - compNet;
+            const awsGrossCost = (totalUnits / 10000) * 0.01;
+            let awsDiscount = 0;
+            if (applyAwsFree) {
+                // Free 25,000 units per month for up to 2 months
+                const freeUnits = Math.min(50000, 25000 * Math.min(2, months));
+                awsDiscount = (freeUnits / 10000) * 0.01;
+                awsDiscount = Math.min(awsDiscount, awsGrossCost);
             }
+            const awsNetCost = Math.max(0, awsGrossCost - awsDiscount);
 
-            // 3. Groq LLM Engine
-            const is70B = modelSelect.value === 'llama-70b';
-            const inRate = is70B ? 0.59 : 0.05;
-            const outRate = is70B ? 0.79 : 0.08;
-
-            const inputTokensM = (totalPatients * 1500) / 1000000;
-            const outputTokensM = (totalPatients * 800) / 1000000;
-            const totalTokensM = inputTokensM + outputTokensM;
-
-            const groqGross = (inputTokensM * inRate) + (outputTokensM * outRate);
-            const groqNet = groqGross;
-
-            // 4. AWS S3 Storage
-            let s3Gross = 0, s3Disc = 0, s3Net = 0;
+            // 4. AWS S3 Storage Calculation ($0.023/GB)
+            // ~5MB audio + text backup per patient = 0.005 GB
             const totalGB = totalPatients * 0.005;
-            if (toggleS3.checked) {
-                s3Gross = totalGB * 0.023;
-                const freeGB = isFreeTier ? 5 : 0;
-                const billableGB = Math.max(0, totalGB - freeGB);
-                s3Net = billableGB * 0.023;
-                s3Disc = s3Gross - s3Net;
+            const s3GrossCost = totalGB * 0.023;
+            let s3Discount = 0;
+            if (applyAwsFree) {
+                // 5GB free tier allowance
+                s3Discount = Math.min(5, totalGB) * 0.023;
             }
+            const s3NetCost = Math.max(0, s3GrossCost - s3Discount);
 
             // Totals
-            const totalNet = dgNet + compNet + groqNet + s3Net;
-            const totalSavings = dgDisc + compDisc + s3Disc;
-            const perUnitCost = totalPatients > 0 ? (totalNet / totalPatients) : 0;
+            const totalNetCostUSD = deepgramNetCost + groqNetCost + awsNetCost + s3NetCost;
+            const totalNetCostINR = totalNetCostUSD * usdToInr;
+            const costPerPatientUSD = totalPatients > 0 ? (totalNetCostUSD / totalPatients) : 0;
+            const costPerPatientINR = costPerPatientUSD * usdToInr;
 
-            // Update UI Main Metrics
-            document.getElementById('displayTotalCost').textContent = formatMoney(totalNet);
-            document.getElementById('displayTotalAlt').textContent = formatMoneyAlt(totalNet);
+            // Render Table
+            document.getElementById('deepgramUsage').innerText = `${totalAudioMinutes.toLocaleString()} mins`;
+            document.getElementById('deepgramGross').innerText = `$${deepgramGrossCost.toFixed(2)}`;
+            document.getElementById('deepgramDiscount').innerText = `-$${deepgramDiscount.toFixed(2)}`;
+            document.getElementById('deepgramNet').innerText = `$${deepgramNetCost.toFixed(2)}`;
 
-            document.getElementById('displaySavings').textContent = formatMoney(totalSavings);
-            document.getElementById('displaySavingsAlt').textContent = formatMoneyAlt(totalSavings);
+            document.getElementById('groqUsage').innerText = `${inputTokens.toFixed(1)}M In / ${outputTokens.toFixed(1)}M Out`;
+            document.getElementById('groqGross').innerText = `$${groqGrossCost.toFixed(2)}`;
+            document.getElementById('groqDiscount').innerText = `$0.00`;
+            document.getElementById('groqNet').innerText = `$${groqNetCost.toFixed(2)}`;
 
-            document.getElementById('displayPerUnit').textContent = `$${perUnitCost.toFixed(3)}`;
-            document.getElementById('displayPerUnitAlt').textContent = `₹${(perUnitCost * exchangeRate).toFixed(2)}`;
+            document.getElementById('awsUsage').innerText = `${totalUnits.toLocaleString()} Units`;
+            document.getElementById('awsGross').innerText = `$${awsGrossCost.toFixed(2)}`;
+            document.getElementById('awsDiscount').innerText = `-$${awsDiscount.toFixed(2)}`;
+            document.getElementById('awsNet').innerText = `$${awsNetCost.toFixed(2)}`;
 
-            // Derived Volume Stats
-            document.getElementById('statAudioHours').textContent = `${totalAudioHours.toLocaleString()} Hrs`;
-            document.getElementById('statUnits').textContent = `${totalUnits.toLocaleString()}`;
-            document.getElementById('statTokens').textContent = `${totalTokensM.toFixed(1)}M`;
+            document.getElementById('s3Usage').innerText = `${totalGB.toFixed(1)} GB`;
+            document.getElementById('s3Gross').innerText = `$${s3GrossCost.toFixed(2)}`;
+            document.getElementById('s3Discount').innerText = `-$${s3Discount.toFixed(2)}`;
+            document.getElementById('s3Net').innerText = `$${s3NetCost.toFixed(2)}`;
 
-            // Table Rows
-            document.getElementById('rowDgVol').textContent = `${totalAudioMins.toLocaleString()} mins`;
-            document.getElementById('rowDgGross').textContent = formatMoney(dgGross);
-            document.getElementById('rowDgDisc').textContent = `-${formatMoney(dgDisc)}`;
-            document.getElementById('rowDgNet').textContent = formatMoney(dgNet);
+            // Render Summary
+            document.getElementById('totalCostUSD').innerText = `$${totalNetCostUSD.toFixed(2)}`;
+            document.getElementById('totalCostINR').innerText = `(₹${Math.round(totalNetCostINR).toLocaleString()})`;
+            document.getElementById('costPerPatient').innerText = `Cost per consultation: $${costPerPatientUSD.toFixed(3)} / ₹${costPerPatientINR.toFixed(2)}`;
 
-            document.getElementById('rowCompVol').textContent = `${totalUnits.toLocaleString()} units`;
-            document.getElementById('rowCompGross').textContent = formatMoney(compGross);
-            document.getElementById('rowCompDisc').textContent = `-${formatMoney(compDisc)}`;
-            document.getElementById('rowCompNet').textContent = formatMoney(compNet);
+            const freeTierStatus = document.getElementById('freeTierStatus');
+            if (totalNetCostUSD === 0) {
+                freeTierStatus.className = "bg-emerald-50 text-emerald-900 border border-emerald-200 px-4 py-2 rounded-lg text-xs font-medium";
+                freeTierStatus.innerText = "100% Covered by Free Tiers";
+            } else {
+                freeTierStatus.className = "bg-amber-50 text-amber-900 border border-amber-200 px-4 py-2 rounded-lg text-xs font-medium";
+                freeTierStatus.innerText = "Paid Tier Active";
+            }
 
-            document.getElementById('rowGroqVol').textContent = `${totalTokensM.toFixed(2)}M tokens`;
-            document.getElementById('rowGroqRate').textContent = `$${inRate} / 1M input tokens`;
-            document.getElementById('rowGroqGross').textContent = formatMoney(groqGross);
-            document.getElementById('rowGroqNet').textContent = formatMoney(groqNet);
+            // ROI Metrics
+            // 12 mins saved per patient = 0.2 hours
+            const totalHoursSaved = totalPatients * 0.2;
+            const totalValueINR = totalHoursSaved * (1200 / 60) * 12; // doctor billing @ ₹1,200/hr
+            document.getElementById('hoursSaved').innerText = `${Math.round(totalHoursSaved).toLocaleString()} hrs`;
+            document.getElementById('valueCreated').innerText = `₹${Math.round(totalValueINR).toLocaleString()}`;
 
-            document.getElementById('rowS3Vol').textContent = `${totalGB.toFixed(1)} GB`;
-            document.getElementById('rowS3Gross').textContent = formatMoney(s3Gross);
-            document.getElementById('rowS3Disc').textContent = `-${formatMoney(s3Disc)}`;
-            document.getElementById('rowS3Net').textContent = formatMoney(s3Net);
-
-            // Update Chart
-            updateChart([dgNet, compNet, groqNet, s3Net]);
+            // Update Charts
+            renderCharts(deepgramNetCost, groqNetCost, awsNetCost, s3NetCost, audioDuration, months, modelInfo, applyDeepgramFree, applyAwsFree);
         }
 
-        function initChart() {
-            const ctx = document.getElementById('costDonutChart').getContext('2d');
-            donutChart = new Chart(ctx, {
+        function renderCharts(dg, groq, aws, s3, audioDur, months, modelInfo, applyDgFree, applyAwsFree) {
+            // Cost Distribution Donut Chart
+            const ctx1 = document.getElementById('costChart').getContext('2d');
+            
+            if (costChart) costChart.destroy();
+            
+            costChart = new Chart(ctx1, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Deepgram STT', 'AWS Comprehend Med', 'Groq LLM Engine', 'AWS S3 Storage'],
+                    labels: ['Deepgram STT', 'Groq LLM', 'AWS Comprehend', 'AWS S3'],
                     datasets: [{
-                        data: [0, 0, 0, 0],
-                        backgroundColor: ['#2c3b4e', '#bd5338', '#2a633d', '#94a3b8'],
-                        borderWidth: 3,
+                        data: [dg, groq, aws, s3],
+                        backgroundColor: ['#2a633d', '#1c1917', '#c2410c', '#a8a29e'],
+                        borderWidth: 2,
                         borderColor: '#ffffff'
                     }]
                 },
@@ -637,30 +378,52 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: {
-                            position: 'right',
-                            labels: {
-                                font: { family: 'Inter', size: 11 },
-                                color: '#1c1e21',
-                                boxWidth: 12,
-                                padding: 16
-                            }
-                        }
-                    },
-                    cutout: '72%'
+                        legend: { position: 'right', labels: { boxWidth: 12, font: { size: 11 } } }
+                    }
+                }
+            });
+
+            // Scaling Line Chart
+            const ctx2 = document.getElementById('scalingChart').getContext('2d');
+            const sampleVolumes = [10, 50, 100, 250, 500];
+            const sampleCosts = sampleVolumes.map(vol => {
+                const patients = vol * 30 * months;
+                const dgGross = patients * audioDur * 0.0043;
+                const dgNet = Math.max(0, dgGross - (applyDgFree ? Math.min(200, dgGross) : 0));
+                const groqCost = ((patients * 3000)/1000000 * modelInfo.input) + ((patients * 1500)/1000000 * modelInfo.output);
+                return Math.round(dgNet + groqCost);
+            });
+
+            if (scalingChart) scalingChart.destroy();
+
+            scalingChart = new Chart(ctx2, {
+                type: 'line',
+                data: {
+                    labels: ['10/day', '50/day', '100/day', '250/day', '500/day'],
+                    datasets: [{
+                        label: 'Estimated Spend ($ USD)',
+                        data: sampleCosts,
+                        borderColor: '#2a633d',
+                        backgroundColor: 'rgba(42, 99, 61, 0.08)',
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { ticks: { font: { size: 10 } } },
+                        x: { ticks: { font: { size: 10 } } }
+                    }
                 }
             });
         }
 
-        function updateChart(data) {
-            if (!donutChart) return;
-            donutChart.data.datasets[0].data = data;
-            donutChart.update();
-        }
-
-        window.onload = function() {
-            initChart();
-            calculate();
+        // Initialize on page load
+        window.onload = () => {
+            calculateCosts();
         };
     </script>
 </body>
